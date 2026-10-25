@@ -1,0 +1,186 @@
+<!-- 1. Filtro -->
+<section>
+  <h2>Filtrar</h2>
+
+  <form [formGroup]="filtro">
+    <label>
+      Nome
+      <input formControlName="nome" />
+    </label>
+
+    <label>
+      CPF
+      <input formControlName="cpf" maxlength="11" />
+    </label>
+
+    <button type="button" (click)="pesquisar()">Pesquisar</button>
+    <button type="button" (click)="limparFiltro()">Limpar</button>
+  </form>
+</section>
+
+@if (mensagem()) {
+  <p>{{ mensagem() }}</p>
+}
+
+<!-- 2. Tabela -->
+<section>
+  <h2>Pessoas</h2>
+
+  @if (pessoas().length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th class="ordenavel" (click)="ordenar('id')">
+            ID
+            @if (ordenarPor() === 'id') {
+              {{ direcao() === 'asc' ? '▲' : '▼' }}
+            }
+          </th>
+          <th class="ordenavel" (click)="ordenar('nome')">
+            Nome
+            @if (ordenarPor() === 'nome') {
+              {{ direcao() === 'asc' ? '▲' : '▼' }}
+            }
+          </th>
+
+          <th>Nascimento</th>
+          <th>CPF</th>
+          <th>Sexo</th>
+          <th class="ordenavel" (click)="ordenar('altura')">
+            Altura (cm)
+            @if (ordenarPor() === 'altura') {
+              {{ direcao() === 'asc' ? '▲' : '▼' }}
+            }
+          </th>
+          <th class="ordenavel" (click)="ordenar('peso')">
+            Peso (kg)
+            @if (ordenarPor() === 'peso') {
+              {{ direcao() === 'asc' ? '▲' : '▼' }}
+            }
+          </th>
+          @if (selecionada()) {
+            <th>Ações</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of pessoasOrdenadas(); track p.id) {
+          @if (selecionada()?.id === p.id) {
+            <tr [formGroup]="edicao">
+              <td>{{ p.id }}</td>
+              <td><input formControlName="nome" /></td>
+              <td><input type="date" formControlName="data_nasc" /></td>
+              <td>
+                <input formControlName="cpf" maxlength="11" />
+                @if (edicao.controls.cpf.dirty && edicao.controls.cpf.hasError('pattern')) {
+                  <small class="erro-campo">O CPF deve ter 11 números.</small>
+                }
+                @if (edicao.controls.cpf.dirty && edicao.controls.cpf.hasError('required')) {
+                  <small class="erro-campo">O CPF é obrigatório.</small>
+                }
+              </td>
+              <td>
+                <select formControlName="sexo">
+                  <option value="M">M</option>
+                  <option value="F">F</option>
+                </select>
+              </td>
+              <td><input type="number" step="1" formControlName="altura" /></td>
+              <td><input type="number" step="0.1" formControlName="peso" /></td>
+              <td>
+                <button type="button" (click)="alterar()" [disabled]="edicao.invalid">
+                  Salvar
+                </button>
+                <button type="button" (click)="cancelar()">Cancelar</button>
+                <button type="button" (click)="calcularPesoIdeal()">Peso ideal</button>
+                <button type="button" class="delete" (click)="excluir()">Excluir</button>
+              </td>
+            </tr>
+          } @else {
+            <tr (click)="selecionar(p)" style="cursor: pointer">
+              <td>{{ p.id }}</td>
+              <td>{{ p.nome }}</td>
+              <td>{{ p.data_nasc }}</td>
+              <td>{{ p.cpf }}</td>
+              <td>{{ p.sexo }}</td>
+              <td>{{ p.altura }}</td>
+              <td>{{ p.peso }}</td>
+              @if (selecionada()) {
+                <td></td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p>Nenhuma pessoa encontrada.</p>
+  }
+</section>
+
+<!-- 3. Cadastro -->
+<section class="cadastro">
+  <h2>Cadastro</h2>
+
+  <form [formGroup]="form">
+    <label>
+      Nome
+      <input formControlName="nome" />
+    </label>
+
+    <label>
+      Data de nascimento
+      <input type="date" formControlName="data_nasc" />
+    </label>
+
+    <label>
+      CPF (somente números)
+      <input formControlName="cpf" maxlength="11" />
+    </label>
+
+    <label>
+      Sexo
+      <select formControlName="sexo">
+        <option value="M">Masculino</option>
+        <option value="F">Feminino</option>
+      </select>
+    </label>
+
+    <label>
+      Altura (cm)
+      <input type="number" step="1" formControlName="altura" />
+    </label>
+
+    <label>
+      Peso (kg)
+      <input type="number" step="0.1" formControlName="peso" />
+    </label>
+
+    <button type="button" (click)="incluir()" [disabled]="form.invalid">Incluir</button>
+  </form>
+</section>
+
+<!-- 4. Modal de erro -->
+@if (erro()) {
+  <div class="modal-fundo" (click)="fecharErro()">
+    <div class="modal modal-erro" (click)="$event.stopPropagation()">
+      <h3>Não foi possível concluir</h3>
+      <p class="modal-erro-texto">{{ erro() }}</p>
+      <button type="button" class="delete" (click)="fecharErro()">Fechar</button>
+    </div>
+  </div>
+}
+
+<!-- 5. Modal de peso ideal -->
+@if (pesoIdeal() !== null) {
+  <div class="modal-fundo" (click)="fecharModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>Peso ideal</h3>
+      <p>
+        {{ selecionada()?.nome }}:
+        <strong>{{ pesoIdeal() }} kg</strong>
+      </p>
+      <button type="button" (click)="fecharModal()">Fechar</button>
+    </div>
+  </div>
+}

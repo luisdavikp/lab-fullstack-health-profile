@@ -1,0 +1,41 @@
+# ======== Variáveis de ambiente ========
+.env
+.env.*
+!.env-example
+
+# ======== Python / Django (backend) ========
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+*.log
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ======== Node / Angular (frontend) ========
+# complementa o frontend/.gitignore
+node_modules/
+dist/
+.angular/
+
+# ======== Editores ========
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ======== Sistema ========
+.DS_Store
+Thumbs.db
+desktop.ini
